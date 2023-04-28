@@ -15,76 +15,62 @@ _cost = 0.00
 class website(PBF):
     def __enter__(self):
         return [
-            RegCmd(
-                name = "QQ绑定 ",
-                usage = "QQ绑定 <用户ID> <密钥>",
-                permission = "anyone",
-                function = "website@connectQQ",
-                description = "将该用户与网站账户绑定",
-                mode = "官网功能",
-                hidden = 0,
-                type = "command"
-            ),
-            RegCmd(
-                name = "QQ群绑定 ",
-                usage = "QQ群绑定 <用户QQ号>",
-                permission = "ao",
-                function = "website@connectQG",
-                description = "将该用户绑定到此QQ群，他可以管理该群设置",
-                mode = "官网功能",
-                hidden = 0,
-                type = "command"
-            ),
-            RegCmd(
-                name = "QQ群解绑 ",
-                usage = "QQ群解绑 <用户QQ号>",
-                permission = "admin",
-                function = "website@disconnectQG",
-                description = "将该用户解绑到此QQ群",
-                mode = "官网功能",
-                hidden = 0,
-                type = "command"
-            ),
-            RegCmd(
-                name = "ping ",
-                usage = "ping <IP> <Port>",
-                permission = "anyone",
-                function = "website@ping_check",
-                description = "ping某IP",
-                mode = "站长工具",
-                hidden = 0,
-                type = "command"
-            ),
-            RegCmd(
-                name = "whois ",
-                usage = "whois <域名>",
-                permission = "anyone",
-                function = "website@whois",
-                description = "查询某域名的whois信息",
-                mode = "站长工具",
-                hidden = 0,
-                type = "command"
-            ),
-            RegCmd(
-                name = "扫描端口 ",
-                usage = "扫描端口 <IP>",
-                permission = "admin",
-                function = "website@telnetport",
-                description = "扫描某IP开放的端口，刷屏警告！",
-                mode = "站长工具",
-                hidden = 0,
-                type = "command"
-            ),
-            RegCmd(
-                name = "SEO查询 ",
-                usage = "SEO查询 <域名>",
-                permission = "anyone",
-                function = "website@seoCheck",
-                description = "查询SEO权重",
-                mode = "站长工具",
-                hidden = 0,
-                type = "command"
-            )
+    @RegCmd(
+        name = "QQ绑定 ",
+        usage = "QQ绑定 <用户ID> <密钥>",
+        permission = "anyone",
+        function = "website@connectQQ",
+        description = "将该用户与网站账户绑定",
+        mode = "官网功能"
+    )
+    @RegCmd(
+        name = "QQ群绑定 ",
+        usage = "QQ群绑定 <用户QQ号>",
+        permission = "ao",
+        function = "website@connectQG",
+        description = "将该用户绑定到此QQ群，他可以管理该群设置",
+        mode = "官网功能"
+    )
+    @RegCmd(
+        name = "QQ群解绑 ",
+        usage = "QQ群解绑 <用户QQ号>",
+        permission = "admin",
+        function = "website@disconnectQG",
+        description = "将该用户解绑到此QQ群",
+        mode = "官网功能"
+    )
+    @RegCmd(
+        name = "ping ",
+        usage = "ping <IP> <Port>",
+        permission = "anyone",
+        function = "website@ping_check",
+        description = "ping某IP",
+        mode = "站长工具"
+    )
+    @RegCmd(
+        name = "whois ",
+        usage = "whois <域名>",
+        permission = "anyone",
+        function = "website@whois",
+        description = "查询某域名的whois信息",
+        mode = "站长工具"
+    )
+    @RegCmd(
+        name = "扫描端口 ",
+        usage = "扫描端口 <IP>",
+        permission = "admin",
+        function = "website@telnetport",
+        description = "扫描某IP开放的端口，刷屏警告！",
+        mode = "站长工具"
+    )
+    @RegCmd(
+        name = "SEO查询 ",
+        usage = "SEO查询 <域名>",
+        permission = "anyone",
+        function = "website@seoCheck",
+        description = "查询SEO权重",
+        mode = "站长工具"
+    )
         ]
     
     def disconnectQG(self):
