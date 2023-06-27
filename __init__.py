@@ -1,10 +1,11 @@
-from pbf import PBF
-from utils.RegCmd import RegCmd
-import sys, requests, telnetlib, threading, os, random, traceback, re
+from pbf.controller.PBF import PBF
+from pbf.utils.RegCmd import RegCmd
+from pbf.model.ConnectQGModel import ConnectQGModel
+import requests, telnetlib, threading, os, random, re
 from tcping import Ping
 from bs4 import BeautifulSoup as bs
 
-from plugins.tools import tools
+# from ..tools import tools
 
 _name = "网站系统"
 _version = "1.0.1"
@@ -13,75 +14,29 @@ _author = "xzyStudio"
 _cost = 0.00
 
 class website(PBF):
-    def __enter__(self):
-        return [
     @RegCmd(
-        name = "QQ绑定 ",
-        usage = "QQ绑定 <用户ID> <密钥>",
-        permission = "anyone",
-        function = "website@connectQQ",
-        description = "将该用户与网站账户绑定",
-        mode = "官网功能"
+        name="QQ群解绑 ",
+        usage="QQ群解绑 <用户QQ号>",
+        permission="admin",
+        description="将该用户解绑到此QQ群",
+        mode="官网功能"
     )
-    @RegCmd(
-        name = "QQ群绑定 ",
-        usage = "QQ群绑定 <用户QQ号>",
-        permission = "ao",
-        function = "website@connectQG",
-        description = "将该用户绑定到此QQ群，他可以管理该群设置",
-        mode = "官网功能"
-    )
-    @RegCmd(
-        name = "QQ群解绑 ",
-        usage = "QQ群解绑 <用户QQ号>",
-        permission = "admin",
-        function = "website@disconnectQG",
-        description = "将该用户解绑到此QQ群",
-        mode = "官网功能"
-    )
-    @RegCmd(
-        name = "ping ",
-        usage = "ping <IP> <Port>",
-        permission = "anyone",
-        function = "website@ping_check",
-        description = "ping某IP",
-        mode = "站长工具"
-    )
-    @RegCmd(
-        name = "whois ",
-        usage = "whois <域名>",
-        permission = "anyone",
-        function = "website@whois",
-        description = "查询某域名的whois信息",
-        mode = "站长工具"
-    )
-    @RegCmd(
-        name = "扫描端口 ",
-        usage = "扫描端口 <IP>",
-        permission = "admin",
-        function = "website@telnetport",
-        description = "扫描某IP开放的端口，刷屏警告！",
-        mode = "站长工具"
-    )
-    @RegCmd(
-        name = "SEO查询 ",
-        usage = "SEO查询 <域名>",
-        permission = "anyone",
-        function = "website@seoCheck",
-        description = "查询SEO权重",
-        mode = "站长工具"
-    )
-        ]
-    
     def disconnectQG(self):
         uid = self.data.se.get('user_id')
         gid = self.data.se.get('group_id')
         message = self.data.message
         uuid = self.data.uuid
-        
-        self.mysql.commonx('DELETE FROM `botConnectqg` WHERE `uuid`=%s and `uid`=%s and `gid`=%s', (uuid, uid, gid))
+
+        ConnectQGModel(uuid=uuid, uid=uid, gid=gid)._delete()
         self.client.msg().raw('[CQ:face,id=54] 解绑成功！')
-    
+
+    @RegCmd(
+        name="QQ群绑定 ",
+        usage="QQ群绑定 <用户QQ号>",
+        permission="ao",
+        description="将该用户绑定到此QQ群，他可以管理该群设置",
+        mode="官网功能"
+    )
     def connectQG(self):
         uid = self.data.se.get('user_id')
         gid = self.data.se.get('group_id')
@@ -90,13 +45,19 @@ class website(PBF):
         
         if not gid:
             return self.client.msg().raw('请在要绑定的群组中使用该指令！')
-        
-        if not self.mysql.selectx('SELECT * FROM `botConnectqg` WHERE `uuid`=%s and `uid`=%s and `gid`=%s', (uuid, uid, gid)):
-            self.mysql.commonx('INSERT INTO `botConnectqg` (`uuid`,`uid`,`gid`) VALUES (%s, %s, %s);', (uuid, message, gid))
+
+        if not ConnectQGModel(uuid=uuid, uid=uid, gid=gid).exists:
             self.client.msg().raw('[CQ:face,id=54] 绑定成功！')
         else:
             self.client.msg().raw('[CQ:face,id=151] 该用户已经绑定过本群了！')
-    
+
+    @RegCmd(
+        name="QQ绑定 ",
+        usage="QQ绑定 <用户ID> <密钥>",
+        permission="anyone",
+        description="将该用户与网站账户绑定",
+        mode="官网功能"
+    )
     def connectQQ(self):
         uid = self.data.se.get('user_id')
         gid = self.data.se.get('group_id')
@@ -124,7 +85,14 @@ class website(PBF):
             self.client.msg().raw('{0} port {1} is open'.format(ip, port))
         finally:
             server.close()
-            
+
+    @RegCmd(
+        name="扫描端口 ",
+        usage="扫描端口 <IP>",
+        permission="admin",
+        description="扫描某IP开放的端口，刷屏警告！",
+        mode="站长工具"
+    )
     def telnetport(self, minport=20, maxport=36500):
         uid = self.data.se.get('user_id')
         gid = self.data.se.get('group_id')
@@ -143,7 +111,14 @@ class website(PBF):
      
         for t in threads:
             t.join()
-    
+
+    @RegCmd(
+        name="whois ",
+        usage="whois <域名>",
+        permission="anyone",
+        description="查询某域名的whois信息",
+        mode="站长工具"
+    )
     def whois(self):
         uid = self.data.se.get('user_id')
         gid = self.data.se.get('group_id')
@@ -155,7 +130,15 @@ class website(PBF):
             self.client.msg().raw(con)
         else:
             self.client.msg().raw('没有查询到')
-    
+
+    @RegCmd(
+        name="ping ",
+        usage="ping <IP> <Port>",
+        permission="anyone",
+        function="website@ping_check",
+        description="ping某IP",
+        mode="站长工具"
+    )
     def ping_check(self):
         uid = self.data.se.get('user_id')
         gid = self.data.se.get('group_id')
@@ -203,7 +186,14 @@ class website(PBF):
             return url, br
         except Exception as e:
             pass
-    
+
+    @RegCmd(
+        name="SEO查询 ",
+        usage="SEO查询 <域名>",
+        permission="anyone",
+        description="查询SEO权重",
+        mode="站长工具"
+    )
     def seoCheck(self):
         self.client.msg().raw("Loading...")
         # html = self.get_html(self.data.message)
